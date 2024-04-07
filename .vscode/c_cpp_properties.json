@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                        ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "C:\\MinGW\\bin\\g++.exe",
+            "cStandard": "gnu11",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "windows-gcc-x86",
+            "configurationProvider": "ms-vscode.makefile-tools",
+            "compilerArgs": [
+                "-I lib/SDL2_lib/include",
+                "-L lib/SDL2_lib/lib",
+                "-lmingw32",
+                "-lSDL2main",
+                "-lSDL2"
+            ]
+        }
+    ],
+    "version": 4
+}
