@@ -56,10 +56,6 @@ std::string Player::getName() const {
     return name;
 }
 
-int Player::getScore() const {
-    return score;
-}
-
 bool Player::loadTexture(const char* path) {
     SDL_Surface* playerSurface = IMG_Load(path);
     if (playerSurface == nullptr) {

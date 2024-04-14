@@ -58,10 +58,16 @@ void Hub::saveScoreToFile(const std::string& name, int score) {
         std::cerr << "Unable to open file!" << std::endl;
         return;
     }
+    if (!(file << name << " " << score << std::endl)) {
+        std::cerr << "Error writing to file!" << std::endl;
+        file.close();
+        return;
+    }
 
-    file << name << " " << score << std::endl;
     file.close();
 }
+
+
 
 void Hub::renderTopScores(const std::vector<std::pair<std::string, int>>& scores, SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0xFF);

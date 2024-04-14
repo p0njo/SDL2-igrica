@@ -22,9 +22,8 @@ void resetGame(Player& player, Enemy*& enemy, int& score, int& unlockedArena, in
     player.setY(WORLD_HEIGHT / 2);
     player.setHealth(100);
     player.setMap(0);
-    score = player.getScore();
     hub.saveScoreToFile(playerName, score);
-
+    
     if (enemy) {
         delete enemy;
         enemy = nullptr;
@@ -45,6 +44,7 @@ Replay replay;
 int main(int argc, char* args[]) {
     bool eKeyPressed = false;
     int currentSelection = 0;
+    int score = 0; 
 
     GameState gameState = GAME_STATE_MENU;
 
@@ -126,8 +126,6 @@ int main(int argc, char* args[]) {
     const Uint32 RESPAWN_TIME = 2000;
     Uint32 respawnTimer = 0;
 
-    int score = 0; 
-
     const int SCORE_THRESHOLD_ARENA1 = 500;
     const int SCORE_THRESHOLD_ARENA2 = 1000;
 
@@ -161,29 +159,22 @@ if (isReplayMode) {
             }
 
             if (e.key.keysym.sym == SDLK_e) {
-            if (enemy && player.checkCollision(*enemy)) {
-    delete enemy;
-    enemy = nullptr;
-    score += 100; 
+    if (enemy && player.checkCollision(*enemy)) {
+        delete enemy;
+        enemy = nullptr;
+        score += 100;
 
-    // Check for arena completion or unlock next arena
-    if (unlockedArena == 0 && score >= SCORE_THRESHOLD_ARENA1) {
-        unlockedArena = 1;
-        currentArenaEnemyCount = 3;  // 3 enemies in the second arena
-    } else if (unlockedArena == 1 && score >= SCORE_THRESHOLD_ARENA2) {
-        unlockedArena = 2;
-        currentArenaEnemyCount = 5;  // 5 enemies in the third arena
+        if (unlockedArena == 0 && score >= SCORE_THRESHOLD_ARENA1) {
+            unlockedArena = 1;
+            currentArenaEnemyCount = 3;
+        } else if (unlockedArena == 1 && score >= SCORE_THRESHOLD_ARENA2) {
+            unlockedArena = 2;
+            currentArenaEnemyCount = 5;
+        }
+
+        enemyKilled = true;
     }
-
-    enemyKilled = true;  // Set this to true
 }
-
-// Reset enemyKilled and allow new enemy spawns
-if (enemyKilled) {
-    enemyKilled = false;
-}
-            }
-    
             if (gameState == GAME_STATE_ENTER_NAME) {
                 if (e.type == SDL_KEYDOWN) {
                     if (e.key.keysym.sym == SDLK_BACKSPACE && playerName.length() > 0) {
@@ -191,6 +182,7 @@ if (enemyKilled) {
                     } else if (e.key.keysym.sym == SDLK_RETURN) {
                         enteringName = false;  
                         gameState = GAME_STATE_NORMAL; 
+                        remove("movements.txt");
                     } else if ((e.key.keysym.sym >= SDLK_a && e.key.keysym.sym <= SDLK_z) || 
                                (e.key.keysym.sym >= SDLK_0 && e.key.keysym.sym <= SDLK_9) ||
                                e.key.keysym.sym == SDLK_SPACE) {
@@ -469,9 +461,10 @@ SDL_Rect quitRect = {
             return -1;
         }
         enemyKilled = false;
-        respawnTimer = 0;  // Reset respawn timer
+        respawnTimer = 0;
     }
 }
+
         events.clear();
     }
 

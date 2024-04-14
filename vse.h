@@ -78,8 +78,6 @@ public:
     void setName(const std::string& playerName);
     void inputPlayerName(SDL_Renderer* renderer);
 
-     int getScore() const;
-
      void setScore(int score) {
         this->score = score;
     }
@@ -115,10 +113,17 @@ public:
     const float ENEMY_SPEED = 0.5;
     const int DIRECTION_CHANGE_DELAY = 1000;
 
-    Enemy(int x, int y) 
-        : x_(x), y_(y), velocity_x_(0), velocity_y_(0), 
-          enemyTexture(nullptr), currentMap(0), isFollowingPlayer(false), 
-          lastDirectionChangeTime(0) {}
+    Enemy(int x, int y)
+        : x_(x), y_(y), velocity_x_(0), velocity_y_(0),
+          enemyTexture(nullptr), currentMap(0), isFollowingPlayer(false),
+          lastDirectionChangeTime(0), nextEnemy(nullptr) {}
+
+    ~Enemy() {
+        delete nextEnemy;
+    }
+
+    Enemy(const Enemy&) = delete;
+    Enemy& operator=(const Enemy&) = delete;
 
     void move(GameState& gameState, const Player& player);
     void render(int cameraX, int cameraY);
@@ -128,17 +133,24 @@ public:
 
     bool loadTexture(const char* path);
 
+    Enemy* getNext() {
+        if (!nextEnemy) {
+            nextEnemy = new Enemy(x_, y_);
+        }
+        return nextEnemy;
+    }
+
 private:
     double x_;
     double y_;
     double velocity_x_;
-    double velocity_y_; 
+    double velocity_y_;
     SDL_Texture* enemyTexture;
     int currentMap;
     bool isFollowingPlayer;
     int lastDirectionChangeTime;
+    Enemy* nextEnemy;
 };
-
 
 class ArenaGate {
 public:
