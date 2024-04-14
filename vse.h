@@ -12,6 +12,9 @@
 #include <cmath>
 #include <fstream>
 #include <vector>
+#include <map>
+#include <algorithm>
+#include <sstream>
 
 extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;
@@ -30,7 +33,10 @@ enum GameState {
     GAME_STATE_NORMAL,
     GAME_STATE_ARENA,
     GAME_STATE_MENU,
-    GAME_STATE_QUIT
+    GAME_STATE_QUIT,
+    GAME_STATE_ENTER_NAME,
+    GAME_STATE_TOP_SCORES,
+    GAME_STATE_REPLAY
 };
 
 class Enemy;
@@ -40,6 +46,8 @@ public:
     static const int PLAYER_WIDTH = 50;
     static const int PLAYER_HEIGHT = 50;
     const int PLAYER_SPEED = 1;
+
+    Player();
 
     Player(int x, int y) 
     : x_(x), y_(y), velocity_x_(0), velocity_y_(0), playerTexture(nullptr), currentMap(0), PLAYER_HEALTH(100) {}
@@ -58,13 +66,34 @@ public:
     void reduceHealth(int amount);
 
     bool loadTexture(const char* path);
-    bool checkCollision(const Enemy& enemy);  // Now it should work
+    bool checkCollision(const Enemy& enemy); 
 
     int getCurrentMap() const { return currentMap; }
     void setCurrentMap(int map) { currentMap = map; }
     
     int getHealthSegments() const { 
         return PLAYER_HEALTH / 10; 
+    }
+    std::string getName() const;
+    void setName(const std::string& playerName);
+    void inputPlayerName(SDL_Renderer* renderer);
+
+     int getScore() const;
+
+     void setScore(int score) {
+        this->score = score;
+    }
+
+     void setX(int x) {
+        x_ = x;
+    }
+
+    void setY(int y) {
+        y_ = y;
+    }
+
+    void setMap(int map) {
+        currentMap = map;
     }
 
 private:
@@ -75,6 +104,8 @@ private:
     SDL_Texture* playerTexture;
     int currentMap;
     int PLAYER_HEALTH;
+    std::string name;
+    int score;
 };
 
 class Enemy {
@@ -84,10 +115,12 @@ public:
     const float ENEMY_SPEED = 0.5;
     const int DIRECTION_CHANGE_DELAY = 1000;
 
-    Enemy(int x, int y) : x_(x), y_(y), velocity_x_(0), velocity_y_(0), enemyTexture(nullptr), currentMap(0), isFollowingPlayer(false) {}
+    Enemy(int x, int y) 
+        : x_(x), y_(y), velocity_x_(0), velocity_y_(0), 
+          enemyTexture(nullptr), currentMap(0), isFollowingPlayer(false), 
+          lastDirectionChangeTime(0) {}
 
     void move(GameState& gameState, const Player& player);
-
     void render(int cameraX, int cameraY);
 
     int getX() const { return x_; }
@@ -159,14 +192,32 @@ private:
     SDL_Texture* teleporterTexture;
 };
 
+struct Score {
+    std::string name;
+    int score;
+};
+
 class Hub {
-public:
-    Hub() {}
-
-     void renderHealthBar(Player& player, SDL_Renderer* renderer);
-     void renderScore(int score, SDL_Renderer* renderer);
-
 private:
+    TTF_Font* font;
+
+public:
+    Hub() : font(nullptr) {}
+
+    void setFont(TTF_Font* font);
+    void renderHealthBar(Player& player, SDL_Renderer* renderer);
+    void renderScore(int score, SDL_Renderer* renderer);
+    void saveScoreToFile(const std::string& name, int score);
+    std::vector<std::pair<std::string, int>> loadTopScoresFromFile();
+    void saveTopScoreToFile(const Score& newScore);
+    void renderTopScores(const std::vector<std::pair<std::string, int>>& scores, SDL_Renderer* renderer);
+    std::vector<std::pair<std::string, int>> readScoresFromFile(const std::string& filename);
+};
+
+class Replay {
+public:
+    void saveMovementsToFile(const std::vector<SDL_Event>& events);
+    std::vector<SDL_Event> loadMovementsFromFile();
 };
 
 #endif
